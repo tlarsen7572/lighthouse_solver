@@ -48,7 +48,44 @@ func (c *Card) HasPart(part int) bool {
 	return false
 }
 
-var cards = []*Card{
+type Solver struct {
+	Cards []*Card
+}
+
+func (s *Solver) PlaceCards() (bool, [3][3]*Card) {
+	solution := [3][3]*Card{}
+	for index, card := range s.Cards {
+		if index == 0 {
+			solution[0][index] = card
+			continue
+		}
+		priorCard := solution[0][index-1]
+		if card.MatchesRight(priorCard) {
+			solution[0][index] = card
+			continue
+		}
+		if s.tryRotateAndMatch(card, priorCard) {
+			solution[0][index] = card
+			continue
+		}
+		return false, solution
+	}
+	return true, solution
+}
+
+func (s *Solver) tryRotateAndMatch(card *Card, priorCard *Card) bool {
+	rotations := 0
+	for rotations < 4 {
+		card.Rotate()
+		if card.MatchesRight(priorCard) {
+			return true
+		}
+		rotations++
+	}
+	return false
+}
+
+var Cards = []*Card{
 	{Id: 1, Parts: [4]int{RoundIslandTop, FortNiagaraBottom, SplitRockBottom, MarbleheadBottom}},
 	{Id: 2, Parts: [4]int{FortNiagaraBottom, MarbleheadTop, SplitRockTop, RoundIslandTop}},
 	{Id: 3, Parts: [4]int{MarbleheadTop, RoundIslandBottom, FortNiagaraTop, SplitRockBottom}},

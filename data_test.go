@@ -1,6 +1,8 @@
 package lighthouse_solver
 
 import (
+	"fmt"
+	"strings"
 	"testing"
 )
 
@@ -62,5 +64,68 @@ func TestHasPart(t *testing.T) {
 	}
 	if card.HasPart(MarbleheadTop) {
 		t.Fatalf(`card reported it has MarbleheadTop, but it does not`)
+	}
+}
+
+func TestPlaceSingleCard(t *testing.T) {
+	solver := &Solver{Cards: []*Card{Cards[0]}}
+	ok, solution := solver.PlaceCards()
+	if !ok {
+		t.Fatalf(`solver did not solve the solution`)
+	}
+	if actual := solution[0][0].Id; actual != 1 {
+		t.Fatalf(`expected card 1 in top left but got %v`, actual)
+	}
+	logSolution(t, solution)
+}
+
+func TestPlaceTwoCards(t *testing.T) {
+	solver := &Solver{Cards: []*Card{Cards[1], Cards[3]}}
+	ok, solution := solver.PlaceCards()
+	if !ok {
+		t.Fatalf(`solver did not solve the solution`)
+	}
+	if actual := solution[0][0].Id; actual != 2 {
+		t.Fatalf(`expected card 2 in top left but got %v`, actual)
+	}
+	if actual := solution[0][1].Id; actual != 4 {
+		t.Fatalf(`expected card 4 in top middle but got %v`, actual)
+	}
+	logSolution(t, solution)
+}
+
+func TestPlaceTwoCardsThatRequireRotation(t *testing.T) {
+	solver := &Solver{Cards: []*Card{Cards[1], Cards[7]}}
+	ok, solution := solver.PlaceCards()
+	if !ok {
+		t.Fatalf(`solver did not solve the solution`)
+	}
+	if actual := solution[0][0].Id; actual != 2 {
+		t.Fatalf(`expected card 2 in top left but got %v`, actual)
+	}
+	secondCard := solution[0][1]
+	if secondCard.Id != 8 {
+		t.Fatalf(`expected card 8 in top middle but got %v`, secondCard.Id)
+	}
+	if secondCard.Parts[0] != SplitRockBottom {
+		t.Fatalf(`second card should be rotated to have SplitRockBottom on left, but it is not: %v`, secondCard.Parts)
+	}
+	logSolution(t, solution)
+}
+
+func logSolution(t *testing.T, solution [3][3]*Card) {
+	for _, row := range solution {
+		builder := strings.Builder{}
+		for column, card := range row {
+			if column > 0 {
+				builder.WriteString(" ")
+			}
+			if card == nil {
+				builder.WriteString("<nil>")
+			} else {
+				builder.WriteString(fmt.Sprintf(`{%v %v}`, card.Id, card.Parts))
+			}
+		}
+		t.Logf(builder.String())
 	}
 }

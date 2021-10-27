@@ -48,32 +48,41 @@ func (c *Card) HasPart(part int) bool {
 	return false
 }
 
-type Solver struct {
-	Cards []*Card
-}
-
-func (s *Solver) PlaceCards() (bool, [3][3]*Card) {
-	solution := [3][3]*Card{}
-	for index, card := range s.Cards {
-		if index == 0 {
-			solution[0][index] = card
-			continue
-		}
-		priorCard := solution[0][index-1]
-		if card.MatchesRight(priorCard) {
-			solution[0][index] = card
-			continue
-		}
-		if s.tryRotateAndMatch(card, priorCard) {
-			solution[0][index] = card
-			continue
-		}
-		return false, solution
+func Solve(cards []*Card) (bool, []*Card) {
+	if len(cards) > 9 {
+		panic(`max number of cards is 9`)
 	}
-	return true, solution
+	solution := make([]*Card, 9)
+	for index, card := range cards {
+		solution[0] = card
+		newCards := append(cards[:index], cards[index+1:]...)
+		if len(newCards) == 0 {
+			return true, solution
+		}
+		solved := placeNextCard(solution, 1, newCards)
+		if solved {
+			return true, solution
+		}
+	}
+	return false, solution
 }
 
-func (s *Solver) tryRotateAndMatch(card *Card, priorCard *Card) bool {
+func placeNextCard(solution []*Card, intoIndex int, cards []*Card) bool {
+	priorCard := solution[intoIndex-1]
+	for index, card := range cards {
+		if card.MatchesRight(priorCard) || tryRotateAndMatch(card, priorCard) {
+			solution[intoIndex] = card
+			newCards := append(cards[:index], cards[index+1:]...)
+			if len(newCards) == 0 {
+				return true
+			}
+			return placeNextCard(solution, intoIndex+1, newCards)
+		}
+	}
+	return false
+}
+
+func tryRotateAndMatch(card *Card, priorCard *Card) bool {
 	rotations := 0
 	for rotations < 4 {
 		card.Rotate()
@@ -85,14 +94,16 @@ func (s *Solver) tryRotateAndMatch(card *Card, priorCard *Card) bool {
 	return false
 }
 
-var Cards = []*Card{
-	{Id: 1, Parts: [4]int{RoundIslandTop, FortNiagaraBottom, SplitRockBottom, MarbleheadBottom}},
-	{Id: 2, Parts: [4]int{FortNiagaraBottom, MarbleheadTop, SplitRockTop, RoundIslandTop}},
-	{Id: 3, Parts: [4]int{MarbleheadTop, RoundIslandBottom, FortNiagaraTop, SplitRockBottom}},
-	{Id: 4, Parts: [4]int{SplitRockBottom, MarbleheadTop, RoundIslandBottom, FortNiagaraTop}},
-	{Id: 5, Parts: [4]int{RoundIslandTop, SplitRockTop, MarbleheadBottom, SplitRockTop}},
-	{Id: 6, Parts: [4]int{MarbleheadTop, RoundIslandTop, MarbleheadBottom, FortNiagaraTop}},
-	{Id: 7, Parts: [4]int{MarbleheadTop, SplitRockBottom, RoundIslandBottom, FortNiagaraTop}},
-	{Id: 8, Parts: [4]int{RoundIslandTop, SplitRockBottom, FortNiagaraTop, MarbleheadTop}},
-	{Id: 9, Parts: [4]int{MarbleheadBottom, RoundIslandTop, FortNiagaraTop, SplitRockTop}},
+func CreateCards() []*Card {
+	return []*Card{
+		{Id: 1, Parts: [4]int{RoundIslandTop, FortNiagaraBottom, SplitRockBottom, MarbleheadBottom}},
+		{Id: 2, Parts: [4]int{FortNiagaraBottom, MarbleheadTop, SplitRockTop, RoundIslandTop}},
+		{Id: 3, Parts: [4]int{MarbleheadTop, RoundIslandBottom, FortNiagaraTop, SplitRockBottom}},
+		{Id: 4, Parts: [4]int{SplitRockBottom, MarbleheadTop, RoundIslandBottom, FortNiagaraTop}},
+		{Id: 5, Parts: [4]int{RoundIslandTop, SplitRockTop, MarbleheadBottom, SplitRockTop}},
+		{Id: 6, Parts: [4]int{MarbleheadTop, RoundIslandTop, MarbleheadBottom, FortNiagaraTop}},
+		{Id: 7, Parts: [4]int{MarbleheadTop, SplitRockBottom, RoundIslandBottom, FortNiagaraTop}},
+		{Id: 8, Parts: [4]int{RoundIslandTop, SplitRockBottom, FortNiagaraTop, MarbleheadTop}},
+		{Id: 9, Parts: [4]int{MarbleheadBottom, RoundIslandTop, FortNiagaraTop, SplitRockTop}},
+	}
 }

@@ -68,42 +68,47 @@ func TestHasPart(t *testing.T) {
 }
 
 func TestPlaceSingleCard(t *testing.T) {
-	solver := &Solver{Cards: []*Card{Cards[0]}}
-	ok, solution := solver.PlaceCards()
+	card := &Card{Id: 1, Parts: [4]int{RoundIslandTop, FortNiagaraBottom, SplitRockBottom, MarbleheadBottom}}
+	cards := []*Card{card}
+	ok, solution := Solve(cards)
 	if !ok {
 		t.Fatalf(`solver did not solve the solution`)
 	}
-	if actual := solution[0][0].Id; actual != 1 {
+	if actual := solution[0].Id; actual != 1 {
 		t.Fatalf(`expected card 1 in top left but got %v`, actual)
 	}
 	logSolution(t, solution)
 }
 
 func TestPlaceTwoCards(t *testing.T) {
-	solver := &Solver{Cards: []*Card{Cards[1], Cards[3]}}
-	ok, solution := solver.PlaceCards()
+	card1 := &Card{Id: 2, Parts: [4]int{FortNiagaraBottom, MarbleheadTop, SplitRockTop, RoundIslandTop}}
+	card2 := &Card{Id: 4, Parts: [4]int{SplitRockBottom, MarbleheadTop, RoundIslandBottom, FortNiagaraTop}}
+	cards := []*Card{card1, card2}
+	ok, solution := Solve(cards)
 	if !ok {
 		t.Fatalf(`solver did not solve the solution`)
 	}
-	if actual := solution[0][0].Id; actual != 2 {
+	if actual := solution[0].Id; actual != 2 {
 		t.Fatalf(`expected card 2 in top left but got %v`, actual)
 	}
-	if actual := solution[0][1].Id; actual != 4 {
+	if actual := solution[1].Id; actual != 4 {
 		t.Fatalf(`expected card 4 in top middle but got %v`, actual)
 	}
 	logSolution(t, solution)
 }
 
 func TestPlaceTwoCardsThatRequireRotation(t *testing.T) {
-	solver := &Solver{Cards: []*Card{Cards[1], Cards[7]}}
-	ok, solution := solver.PlaceCards()
+	card1 := &Card{Id: 2, Parts: [4]int{FortNiagaraBottom, MarbleheadTop, SplitRockTop, RoundIslandTop}}
+	card2 := &Card{Id: 8, Parts: [4]int{RoundIslandTop, SplitRockBottom, FortNiagaraTop, MarbleheadTop}}
+	cards := []*Card{card1, card2}
+	ok, solution := Solve(cards)
 	if !ok {
 		t.Fatalf(`solver did not solve the solution`)
 	}
-	if actual := solution[0][0].Id; actual != 2 {
+	if actual := solution[0].Id; actual != 2 {
 		t.Fatalf(`expected card 2 in top left but got %v`, actual)
 	}
-	secondCard := solution[0][1]
+	secondCard := solution[1]
 	if secondCard.Id != 8 {
 		t.Fatalf(`expected card 8 in top middle but got %v`, secondCard.Id)
 	}
@@ -113,19 +118,34 @@ func TestPlaceTwoCardsThatRequireRotation(t *testing.T) {
 	logSolution(t, solution)
 }
 
-func logSolution(t *testing.T, solution [3][3]*Card) {
-	for _, row := range solution {
-		builder := strings.Builder{}
-		for column, card := range row {
-			if column > 0 {
-				builder.WriteString(" ")
-			}
-			if card == nil {
-				builder.WriteString("<nil>")
-			} else {
-				builder.WriteString(fmt.Sprintf(`{%v %v}`, card.Id, card.Parts))
-			}
-		}
-		t.Logf(builder.String())
+func TestFourthCardShouldMatchTop(t *testing.T) {
+
+}
+
+func TestSolve(t *testing.T) {
+	t.Skip()
+	ok, solution := Solve(CreateCards())
+	logSolution(t, solution)
+	if !ok {
+		t.Fatalf(`solver did not solve the solution`)
 	}
+}
+
+func logSolution(t *testing.T, solution []*Card) {
+	builder := strings.Builder{}
+	builder.WriteString("\n[")
+	for index, card := range solution {
+		if (index+1)%3 == 1 && index > 0 {
+			builder.WriteString("]\n[")
+		} else if index > 0 {
+			builder.WriteString(" ")
+		}
+		if card == nil {
+			builder.WriteString("<nil>")
+		} else {
+			builder.WriteString(fmt.Sprintf(`{%v %v}`, card.Id, card.Parts))
+		}
+	}
+	builder.WriteString(`]`)
+	t.Logf(builder.String())
 }

@@ -148,8 +148,9 @@ func TestFifthCardShouldMatchTopAndLeft(t *testing.T) {
 }
 
 func TestSolve(t *testing.T) {
-	t.Skip()
-	ok, solution := Solve(CreateCards())
+	cards := CreateCards()
+	ok, solution := Solve(cards)
+	logSolution(t, cards)
 	logSolution(t, solution)
 	if !ok {
 		t.Fatalf(`solver did not solve the solution`)

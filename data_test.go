@@ -53,20 +53,6 @@ func TestMatchCard(t *testing.T) {
 	}
 }
 
-func TestHasPart(t *testing.T) {
-	card := &Card{
-		Id:    1,
-		Parts: [4]int{SplitRockTop, RoundIslandBottom, SplitRockTop, SplitRockTop},
-	}
-
-	if !card.HasPart(RoundIslandBottom) {
-		t.Fatalf(`card reported it does not have RoundIslandBottom, but it does`)
-	}
-	if card.HasPart(MarbleheadTop) {
-		t.Fatalf(`card reported it has MarbleheadTop, but it does not`)
-	}
-}
-
 func TestPlaceSingleCard(t *testing.T) {
 	card := &Card{Id: 1, Parts: [4]int{RoundIslandTop, FortNiagaraBottom, SplitRockBottom, MarbleheadBottom}}
 	cards := []*Card{card}

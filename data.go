@@ -39,15 +39,6 @@ func (c *Card) MatchesRightAndBottom(toLeft *Card, toTop *Card) bool {
 	return c.MatchesRight(toLeft) && c.MatchesBottom(toTop)
 }
 
-func (c *Card) HasPart(part int) bool {
-	for _, value := range c.Parts {
-		if value == part {
-			return true
-		}
-	}
-	return false
-}
-
 func Solve(cards []*Card) (bool, []*Card) {
 	if len(cards) > 9 {
 		panic(`max number of cards is 9`)

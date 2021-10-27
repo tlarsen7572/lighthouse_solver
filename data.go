@@ -68,9 +68,21 @@ func Solve(cards []*Card) (bool, []*Card) {
 }
 
 func placeNextCard(solution []*Card, intoIndex int, cards []*Card) bool {
-	priorCard := solution[intoIndex-1]
+	var top *Card
+	var fits func(current *Card, left *Card, top *Card) bool
+	left := solution[intoIndex-1]
+	if intoIndex < 3 {
+		fits = checkLeft
+	} else {
+		top = solution[intoIndex-3]
+		if intoIndex%3 == 0 {
+			fits = checkTop
+		} else {
+			fits = checkTopLeft
+		}
+	}
 	for index, card := range cards {
-		if card.MatchesRight(priorCard) || tryRotateAndMatch(card, priorCard) {
+		if fits(card, left, top) {
 			solution[intoIndex] = card
 			newCards := append(cards[:index], cards[index+1:]...)
 			if len(newCards) == 0 {
@@ -82,11 +94,47 @@ func placeNextCard(solution []*Card, intoIndex int, cards []*Card) bool {
 	return false
 }
 
-func tryRotateAndMatch(card *Card, priorCard *Card) bool {
+func checkLeft(current *Card, left *Card, _ *Card) bool {
+	return current.MatchesRight(left) || tryRotateAndMatchRight(current, left)
+}
+
+func checkTop(current *Card, _ *Card, top *Card) bool {
+	return current.MatchesBottom(top) || tryRotateAndMatchBottom(current, top)
+}
+
+func checkTopLeft(current *Card, left *Card, top *Card) bool {
+	return current.MatchesRightAndBottom(left, top) || tryRotateAndMatchRightBottom(current, left, top)
+}
+
+func tryRotateAndMatchRight(card *Card, left *Card) bool {
 	rotations := 0
 	for rotations < 4 {
 		card.Rotate()
-		if card.MatchesRight(priorCard) {
+		if card.MatchesRight(left) {
+			return true
+		}
+		rotations++
+	}
+	return false
+}
+
+func tryRotateAndMatchBottom(card *Card, top *Card) bool {
+	rotations := 0
+	for rotations < 4 {
+		card.Rotate()
+		if card.MatchesBottom(top) {
+			return true
+		}
+		rotations++
+	}
+	return false
+}
+
+func tryRotateAndMatchRightBottom(card *Card, left *Card, top *Card) bool {
+	rotations := 0
+	for rotations < 4 {
+		card.Rotate()
+		if card.MatchesRightAndBottom(left, top) {
 			return true
 		}
 		rotations++

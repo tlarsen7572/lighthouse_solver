@@ -119,7 +119,32 @@ func TestPlaceTwoCardsThatRequireRotation(t *testing.T) {
 }
 
 func TestFourthCardShouldMatchTop(t *testing.T) {
+	card1 := &Card{Id: 2, Parts: [4]int{2, 2, SplitRockTop, MarbleheadTop}}
+	card2 := &Card{Id: 8, Parts: [4]int{SplitRockBottom, 2, FortNiagaraTop, 2}}
+	card3 := &Card{Id: 8, Parts: [4]int{FortNiagaraBottom, 2, 2, 2}}
+	card4 := &Card{Id: 8, Parts: [4]int{2, MarbleheadBottom, 2, 2}}
+	cards := []*Card{card1, card2, card3, card4}
+	ok, solution := Solve(cards)
 
+	if !ok {
+		t.Fatalf(`solver did not solve the solution`)
+	}
+	logSolution(t, solution)
+}
+
+func TestFifthCardShouldMatchTopAndLeft(t *testing.T) {
+	card1 := &Card{Id: 2, Parts: [4]int{2, 2, SplitRockTop, MarbleheadTop}}
+	card2 := &Card{Id: 8, Parts: [4]int{SplitRockBottom, 2, FortNiagaraTop, RoundIslandTop}}
+	card3 := &Card{Id: 8, Parts: [4]int{FortNiagaraBottom, 2, 2, 2}}
+	card4 := &Card{Id: 8, Parts: [4]int{2, MarbleheadBottom, SplitRockTop, 2}}
+	card5 := &Card{Id: 8, Parts: [4]int{SplitRockBottom, RoundIslandBottom, 2, 2}}
+	cards := []*Card{card1, card2, card3, card4, card5}
+	ok, solution := Solve(cards)
+
+	if !ok {
+		t.Fatalf(`solver did not solve the solution`)
+	}
+	logSolution(t, solution)
 }
 
 func TestSolve(t *testing.T) {
